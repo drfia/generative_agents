@@ -150,8 +150,11 @@ class ReverieServer:
     
     curr_step = dict()
     curr_step["step"] = self.step
-    with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile: 
+    with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile:
       outfile.write(json.dumps(curr_step, indent=2))
+
+    # Ensure movement directory exists (not present in base simulations)
+    os.makedirs(f"{sim_folder}/movement", exist_ok=True)
 
 
   def save(self): 
@@ -599,66 +602,21 @@ class ReverieServer:
 
 
 if __name__ == '__main__':
-  # rs = ReverieServer("base_the_ville_isabella_maria_klaus", 
-  #                    "July1_the_ville_isabella_maria_klaus-step-3-1")
-  # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20", 
-  #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
-  # rs.open_server()
+  import sys as _sys
+  import shutil as _shutil
 
-  origin = input("Enter the name of the forked simulation: ").strip()
-  target = input("Enter the name of the new simulation: ").strip()
-
-  rs = ReverieServer(origin, target)
-  rs.open_server()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  # Auto mode: python reverie.py --auto [steps]
+  if len(_sys.argv) >= 2 and _sys.argv[1] == "--auto":
+    origin = "base_the_ville_isabella_maria_Klaus"
+    target = "auto-simulation"
+    target_folder = f"{fs_storage}/{target}"
+    if os.path.exists(target_folder):
+      _shutil.rmtree(target_folder)
+    steps = int(_sys.argv[2]) if len(_sys.argv) >= 3 else 100
+    rs = ReverieServer(origin, target)
+    rs.start_server(steps)
+  else:
+    origin = input("Enter the name of the forked simulation: ").strip()
+    target = input("Enter the name of the new simulation: ").strip()
+    rs = ReverieServer(origin, target)
+    rs.open_server()
